@@ -4,6 +4,11 @@ export const signIn = z.object({
     email: z.email().min(1, {message: "Email je povinný"})
 });
 
+export const signUpSchema = z.object({
+    email: z.email().min(1, {message: "Email je povinný"}),
+    org: z.number()
+});
+
 export const verify = z.object({
     otp: z.string()
 });
@@ -18,7 +23,14 @@ export const signOutSchema = z.object({
     id: z.number()
 })
 
+export const deleteSchema = z.object({
+     email: z.email().min(1, {message: "Email je povinný"}),
+    id: z.number()
+})
+
 export type SignInType = z.infer<typeof signIn>;
 export type VerifyOTP = z.infer<typeof verify>;
 export type UpdateUserType = z.infer<typeof update>;
 export type SignOutType = z.infer<typeof signOutSchema>;
+export type SignUpType = z.infer<typeof signUpSchema>;
+export type DeleteType = z.infer<typeof deleteSchema>;

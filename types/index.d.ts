@@ -1,3 +1,5 @@
+import { string } from "zod";
+
 export interface ActionResponse<T> {
     success: boolean;
     message: string;
@@ -14,4 +16,11 @@ export type User = {
     surname: string | null;
     email: string;
     role: string;
+    organization_id: number;
 }
+
+export type Organization = {
+    id: number;
+    name: string;
+    created_at?: number;
+};

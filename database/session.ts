@@ -116,6 +116,7 @@ export type Cookies = {
         surname: String(fetchUser.rows[0].surname) || null,
         email: String(fetchUser.rows[0].email),
         role: String(fetchUser.rows[0].role),
+        organization_id: Number(fetchUser.rows[0].organization_id)
       }
       return user
     };

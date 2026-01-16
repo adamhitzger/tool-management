@@ -3,21 +3,28 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useActionState, useEffect } from "react";
-import { ActionResponse } from "@/types";
-import { SignInType } from "@/lib/schema";
+import { ActionResponse, Organization } from "@/types";
+import { SignInType, SignUpType } from "@/lib/schema";
 import { signUp } from "@/database/actions";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
-export const actionState: ActionResponse<SignInType> = {
+export const actionState: ActionResponse<SignUpType> = {
     success: false,
     submitted: false,
     message: "",
 }
 
-export default function SignUpForm(){
+export default function SignUpForm({rows}: {rows: Array<Organization>}){
     const [state, action, isPending]= useActionState(signUp, actionState);
     const router = useRouter()
     useEffect(() => {
@@ -44,12 +51,22 @@ export default function SignUpForm(){
                 placeholder='Zadejte e-mailovou adresu'
                 className='min-w-60'
               />
+              <Select name="org">
+                <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Vyberte organizaci" />
+                </SelectTrigger>
+                <SelectContent>
+                    {rows.map((v: Organization) => (
+                        <SelectItem key={v.id} value={String(v.id)}>{v.name}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
               <Button
                 type='submit'
               >
                {isPending ? <Loader2 className="animate-spin"/> : "Zaregistrovat se"}
               </Button>
-              <span>Pokud už účet máte,<Link className="underline decoration-2 underline-offset-2" href="/auth/sign-in"> přihlašte se</Link></span>
+              <span className="text-center">Pokud už účet máte,<Link className="underline decoration-2 underline-offset-2" href="/auth/sign-in"> přihlašte se</Link></span>
             </form>
     )
 }

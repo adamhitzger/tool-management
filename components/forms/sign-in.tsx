@@ -48,7 +48,7 @@ export default function SignInForm(){
               >
                {isPending ? <Loader2 className="animate-spin"/> : "Přihlásit se"}
               </Button>
-              <span>Pokud účet nemáte, <Link className="underline decoration-2 underline-offset-2" href="/auth/sign-up">zaregistrujte se</Link></span>
+              <span className="text-center">Pokud účet nemáte, <Link className="underline decoration-2 underline-offset-2" href="/auth/sign-up">zaregistrujte se</Link></span>
             </form>
     )
 }

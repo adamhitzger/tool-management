@@ -7,7 +7,7 @@ import { useActionState, useEffect } from "react"
 import { toast } from "sonner"
 import { signOut } from "@/database/actions"
 import { Loader2 } from "lucide-react"
-import { redirect, useRouter } from "next/navigation"
+import { redirect } from "next/navigation"
 
 export const actionState: ActionResponse<SignOutType> = {
     success: false,
@@ -32,7 +32,6 @@ export default function SignOutBtn({
         }
     }       
     }, [state.submitted, state.success, state.message])
-
     return(
         <form className="max-w-80"
             action={action}

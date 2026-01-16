@@ -1,6 +1,6 @@
 "use server";
 
-import { signIn, SignInType, signOutSchema, SignOutType, update, UpdateUserType, verify, VerifyOTP } from "@/lib/schema";
+import { deleteSchema, DeleteType, signIn, SignInType, signOutSchema, SignOutType, signUpSchema, SignUpType, update, UpdateUserType, verify, VerifyOTP } from "@/lib/schema";
 import { ActionResponse } from "@/types";
 import { revalidatePath } from "next/cache";
 import nodemailer from "nodemailer"
@@ -294,16 +294,17 @@ export async function signInVerify(
 }
 
 export async function signUp(
-    prevState: ActionResponse<SignInType>,
+    prevState: ActionResponse<SignUpType>,
     formData: FormData
-): Promise<ActionResponse<SignInType>>{
+): Promise<ActionResponse<SignUpType>>{
 
     try{
-        const nondata: SignInType = {
+        const nondata: SignUpType = {
             email: formData.get("email") as string,
+            org: Number(formData.get("org"))
         };
 
-        const validation = signIn.safeParse(nondata);
+        const validation = signUpSchema.safeParse(nondata);
 
         if(!validation.success) {
             return{
@@ -331,8 +332,8 @@ export async function signUp(
             }
         }
         const insertRequest = await turso.execute({
-            sql:"INSERT INTO requests (email) VALUES (?);",
-            args: [data.email]
+            sql:"INSERT INTO requests (email, organization_id) VALUES (?, ?, );",
+            args: [data.email, data.org]
         });
 
         if(!insertRequest.rowsAffected){
@@ -340,7 +341,7 @@ export async function signUp(
             submitted: true,
             success: false,
             message: "Nepodařilo se zaslat žádost."
-        }
+            }
         }
 
         return {
@@ -358,17 +359,69 @@ export async function signUp(
     }
 }
 
-//User Requests
-export async function acceptRequest(
-    prevState: ActionResponse<SignInType>,
+export async function deleteAccount(
+    prevState: ActionResponse<DeleteType>,
     formData: FormData
-): Promise<ActionResponse<SignInType>>{
+): Promise<ActionResponse<DeleteType>>{
     try{
-        const nondata: SignInType = {
+        const nondata: DeleteType = {
             email: formData.get("email") as string,
+            id: Number(formData.get("id"))
         };
 
-        const validation = signIn.safeParse(nondata);
+        const validation = deleteSchema.safeParse(nondata);
+
+        if(!validation.success){
+            return {
+            submitted: true,
+            success: false,
+            message: "Zadali jste špatně data",
+            errors: validation.error.flatten().fieldErrors,
+            inputs: nondata
+            }
+        }
+
+        const data = validation.data;
+        await removeUserFromSession(await cookies());
+        const delAccount = await turso.execute({
+            sql:"DELETE FROM users WHERE id = ?",
+            args: [data.id]
+        })
+
+        if(!delAccount.rowsAffected){
+            return {
+                submitted: true,
+                success: false,
+                message: "Nepovedlo se smazat účet",
+            }
+        }
+        return {
+            submitted: true,
+            success: true,
+            message: "Účet byl smazán",
+        }
+    }catch(error){
+        console.log(error)
+        return {
+            submitted: true,
+            success: false,
+            message: "Nepovedlo se schválit žadost",
+        }
+    }
+}
+
+//User Requests
+export async function acceptRequest(
+    prevState: ActionResponse<DeleteType>,
+    formData: FormData
+): Promise<ActionResponse<DeleteType>>{
+    try{
+        const nondata: DeleteType = {
+            email: formData.get("email") as string,
+            id: Number(formData.get("id"))
+        };
+
+        const validation = deleteSchema.safeParse(nondata);
 
         if(!validation.success) {
             return{
@@ -409,8 +462,8 @@ export async function acceptRequest(
         }
 
         const accept = await turso.execute({
-            sql: "INSERT INTO users (name, surname, email, role) VALUES (?,?,?,?)",
-            args: ["Změnte si jméno","Změnte si přijmení",data.email, "PLEBS"]
+            sql: "INSERT INTO users (name, surname, email, role, organization_id) VALUES (?,?,?,?,?)",
+            args: ["Změnte si jméno","Změnte si přijmení",data.email, "PLEBS", data.id]
         }) 
 
         if(!accept.rowsAffected){

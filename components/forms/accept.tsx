@@ -1,6 +1,6 @@
 "use client"
 
-import { SignInType } from "@/lib/schema"
+import { DeleteType } from "@/lib/schema"
 import { Button } from "../ui/button"
 import { ActionResponse } from "@/types"
 import { useActionState, useEffect } from "react"
@@ -8,16 +8,18 @@ import { toast } from "sonner"
 import { acceptRequest } from "@/database/actions"
 import { Loader2 } from "lucide-react"
 
-export const actionState: ActionResponse<SignInType> = {
+export const actionState: ActionResponse<DeleteType> = {
     success: false,
     submitted: false,
     message: "",
 }
 
 export default function AcceptRequest({
-    email
+    email,
+    org_id
 }: {
-    email:string
+    email:string,
+    org_id: number
 }) {
     const [state, action, isPending] = useActionState(acceptRequest, actionState);
     useEffect(() => {
@@ -35,6 +37,7 @@ export default function AcceptRequest({
             action={action}
         >
         <input type="hidden" value={email} name="email"/>
+        <input type="hidden" value={org_id} name="id"/>
         <Button 
         type="submit"
         >
