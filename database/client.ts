@@ -1,6 +1,5 @@
-import { createClient } from "@libsql/client";
+import { Pool } from "pg";
 
-export const turso = createClient({
-  url: process.env.TURSO_DATABASE_URL!,
-  authToken: process.env.TURSO_AUTH_TOKEN!,
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
 });

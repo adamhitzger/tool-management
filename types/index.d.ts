@@ -24,3 +24,14 @@ export type Organization = {
     name: string;
     created_at?: number;
 };
+
+export interface ToolHistoryPayload {
+  tool_id: number
+  start: number
+  end: number;
+  obrobek_id: string
+  korekce: string
+  organization_id: number,
+  type: string,
+  machine_id: number
+}

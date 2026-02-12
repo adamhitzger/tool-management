@@ -1,6 +1,12 @@
-import { Redis } from "@upstash/redis";
+import { RedisClientType } from "@redis/client"
+import { createClient } from "redis"
 
-export const redis = new Redis({
-    url: process.env.REDIS_URL!,
-    token: process.env.REDIS_TOKEN!
-})
+let client: RedisClientType
+
+export async function getRedis() {
+  if (!client) {
+    client = createClient({ url: process.env.REDIS_URL })
+    await client.connect()
+  }
+  return client
+}

@@ -3,11 +3,10 @@ import {
   getUserFromSession,
   updateUserSessionExpiration,
 } from "./database/session"
-import { turso } from "./database/client"
-
 export async function proxy(request: NextRequest) {
   const response = (await middlewareAuth(request)) ?? NextResponse.next()
   
+
   await updateUserSessionExpiration({
     set: (key, value, options) => {
       response.cookies.set({ ...options, name: key, value })
@@ -20,13 +19,13 @@ export async function proxy(request: NextRequest) {
 
 async function middlewareAuth(request: NextRequest) {
   const path = request.nextUrl.pathname;
-  if (!path.startsWith("/auth/")) {
+  if (!path.startsWith("/auth/") && !path.startsWith("/api") ) {
     const user = await getUserFromSession(request.cookies)
+    console.log("User:",user)
     if (user == null) {
       return NextResponse.redirect(new URL("/auth/sign-in", request.url))
     }
   }
-
 }
 
 export const config = {

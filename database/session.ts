@@ -1,11 +1,11 @@
 import { z } from "zod"
 import crypto from "crypto"
-import { redis } from "./redis"
-import { turso } from "./client"
+import { getRedis } from "./redis"
+import { pool } from "./client"
 import { User } from "@/types"
 
 const SESSION_EXPIRATION_SECONDS = 60 * 60 * 24 * 2
-const COOKIE_SESSION_KEY = "session-id"
+const COOKIE_SESSION_KEY = "session"
 
 const sessionSchemaId = z.number()
 
@@ -40,9 +40,11 @@ export type Cookies = {
     cookies: Pick<Cookies, "set">
   ) {
     console.log("UserId:",user)
-    const sessionId = crypto.randomBytes(512).toString("hex").normalize()
-    await redis.set(`session:${sessionId}`, sessionSchemaId.parse(user), {
-      ex: SESSION_EXPIRATION_SECONDS,
+    const sessionId = crypto.randomBytes(32).toString("hex").normalize()
+    const redis = await getRedis()
+    await redis.set(`${COOKIE_SESSION_KEY}:${sessionId}`, 
+      JSON.stringify(sessionSchemaId.parse(user)), {
+      EX: SESSION_EXPIRATION_SECONDS,
     })
   
     setCookie(sessionId, cookies)
@@ -55,13 +57,15 @@ export type Cookies = {
     const sessionId = cookies.get(COOKIE_SESSION_KEY)?.value
     if (sessionId == null) return null
   
-    await redis.set(`session:${sessionId}`, sessionSchemaId.parse(user), {
-      ex: SESSION_EXPIRATION_SECONDS,
+     const redis = await getRedis()
+    await redis.set(`${COOKIE_SESSION_KEY}:${sessionId}`, JSON.stringify(sessionSchemaId.parse(user)), {
+      EX: SESSION_EXPIRATION_SECONDS,
     })
   }
 
   export function getUserFromSession(cookies: Pick<Cookies, "get">) {
     const sessionId = cookies.get(COOKIE_SESSION_KEY)?.value
+    console.log(sessionId)
     if (sessionId == null) return null
   
     return getUserSessionById(sessionId)
@@ -75,9 +79,9 @@ export type Cookies = {
   
     const user = await getUserSessionById(sessionId)
     if (user == null) return
-  
-    await redis.set(`session:${sessionId}`, user, {
-      ex: SESSION_EXPIRATION_SECONDS,
+    const redis =  await getRedis()
+    await redis.set(`${COOKIE_SESSION_KEY}:${sessionId}`, JSON.stringify(user), {
+      EX: SESSION_EXPIRATION_SECONDS,
     })
     setCookie(sessionId, cookies)
   }
@@ -88,35 +92,38 @@ export type Cookies = {
     const sessionId = cookies.get(COOKIE_SESSION_KEY)?.value
     if (sessionId == null) return null
   
-    await redis.del(`session:${sessionId}`)
+    const redis = await getRedis()
+    await redis.del(`${COOKIE_SESSION_KEY}:${sessionId}`)
     cookies.delete(COOKIE_SESSION_KEY)
   }
 
   async function getUserSessionById(sessionId: string) {
-    const rawUser = await redis.get(`session:${sessionId}`)
-  
-    const { success, data: user } = sessionSchemaId.safeParse(rawUser)
+     const redis = await getRedis()
+    const rawUser = await redis.get(`${COOKIE_SESSION_KEY}:${sessionId}`)
+    if (!rawUser) return null;
+    const parsed = JSON.parse(rawUser);
+    const { success, data: user } = sessionSchemaId.safeParse(parsed)
   
     return success ? user : null
   }
 
   export async function getUser(cookies: Pick<Cookies, "get">): Promise<User | null>{
     const userFromSession = await getUserFromSession(cookies);
-
-    const fetchUser = await turso.execute({
-            sql:"SELECT * FROM users WHERE id = ?",
-            args: [userFromSession]
-        });
+    await pool.connect();
+    const fetchUser = await pool.query<User>(
+            "SELECT * FROM users WHERE id = $1",
+            [userFromSession]
+        );
     if(fetchUser.rows.length === 0){
        return null
     }else {
       const user: User = {
-        id: Number(fetchUser.rows[0].id),
-        name: String(fetchUser.rows[0].name) || null,   
-        surname: String(fetchUser.rows[0].surname) || null,
-        email: String(fetchUser.rows[0].email),
-        role: String(fetchUser.rows[0].role),
-        organization_id: Number(fetchUser.rows[0].organization_id)
+        id: fetchUser.rows[0].id,
+        name: fetchUser.rows[0].name || null,   
+        surname: fetchUser.rows[0].surname || null,
+        email: fetchUser.rows[0].email,
+        role: fetchUser.rows[0].role,
+        organization_id: fetchUser.rows[0].organization_id
       }
       return user
     };
