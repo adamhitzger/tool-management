@@ -15,7 +15,6 @@ interface Tool {
   first_usage: number
   usage_count: number
   is_ok: number
-  // NEW: počet záznamů v tools_history
   history_count: number
   name: string
 }
@@ -82,7 +81,7 @@ export default async function ToolsPage() {
   await pool.connect()
   const { rows } = await pool.query<Tool>(
      `
-     SELECT 
+    SELECT 
     t.id,
     t.type,
     t.is_ok,
@@ -102,7 +101,6 @@ LEFT JOIN machines m
     ON m.id = t.machine_id
 WHERE t.organization_id = $1
 ORDER BY t.id DESC;
-
     `,
      [user.organization_id]
   )
@@ -120,7 +118,6 @@ console.log(tools)
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
-            
           </>
         }
       />
