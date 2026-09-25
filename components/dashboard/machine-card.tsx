@@ -7,7 +7,6 @@ import { Activity, Power, Zap, X } from "lucide-react"
 import { Machine } from "./machines-grid"
 import { deleteMachine } from "@/database/actions"
 import { toast } from "sonner"
-import { UpdateMachineDialog } from "../forms/update-machine"
 
 export function MachineCard({ machine, isAdmin }: { machine: Machine , isAdmin: boolean}) {
   const isRunning = machine.is_running === 1

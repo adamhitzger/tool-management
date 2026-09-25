@@ -4,12 +4,10 @@ import { getUser } from "@/database/session"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
-import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
 import { PageHeader } from "@/components/dashboard/page-header"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { DataTable } from "@/components/dashboard/data-table"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import Link from "next/link"
 
 import { Wrench, Clock, Activity, TrendingUp } from "lucide-react"
 
@@ -48,16 +46,15 @@ export default async function ToolDetailPage({ params }: ToolDetailPageProps) {
        t.first_usage
   FROM tools_history th
   JOIN tools t ON th.tool_id = t.id
-  WHERE th.organization_id = $1 AND th.tool_id = $2
+  WHERE th.tool_id = $1
+  ORDER BY th.start DESC
     `,
-     [user.organization_id, id])
+     [id])
 
   const history = rows as unknown as ToolHistoryRow[]
-console.log(history[0].first_usage)
   // 2) Když neexistuje nástroj 
   const toolType = history[0]?.type ?? "Neznámý"
   const firstUsage = new Date(Number(history[0]?.first_usage)*1000).toLocaleDateString("cs-CZ")
-  console.log(firstUsage)
   // 3) Statistika z historie
   const totalSeconds = history.reduce(
     (acc, row) => acc + (Number(row.end) - Number(row.start)),
@@ -123,7 +120,12 @@ console.log(history[0].first_usage)
       key: "obrobek_id",
       header: "ID obrobku",
       render: (row: ToolHistoryRow) => (
-        <span className="font-mono text-sm">{String(row.obrobek_id)}</span>
+        <Link
+          href={`/obrobky/${encodeURIComponent(String(row.obrobek_id))}`}
+          className="relative z-20 font-mono text-sm text-primary hover:underline"
+        >
+          {String(row.obrobek_id)}
+        </Link>
       ),
     },
   ] as const

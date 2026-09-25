@@ -10,7 +10,7 @@ export default function Verify() {
           <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
             <Wrench className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-semibold text-foreground">Houfek</span>
+          <span className="text-xl font-semibold text-foreground">Teijin</span>
         </div>
 
         <div className="space-y-6">
@@ -24,7 +24,7 @@ export default function Verify() {
         </div>
 
         <p className="text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} Houfek Tool Management
+          &copy; {new Date().getFullYear()} Teijin Tool Management
         </p>
       </div>
 
@@ -37,7 +37,7 @@ export default function Verify() {
               <Wrench className="h-5 w-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-semibold text-foreground">
-              Houfek
+              Teijin
             </span>
           </div>
 

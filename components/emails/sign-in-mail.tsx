@@ -12,10 +12,9 @@ import {
 
 type SignInEmailProps = {
   code: string;
-  company: string;
 };
 
-export function SignInEmail({ code, company }: SignInEmailProps) {
+export function SignInEmail({ code }: SignInEmailProps) {
   return (
     <Html lang="cs">
       <Head />
@@ -24,7 +23,7 @@ export function SignInEmail({ code, company }: SignInEmailProps) {
         <Container style={container}>
           {/* Header */}
           <Section style={header}>
-            <Text style={logo}>{company}</Text>
+            <Text style={logo}>Teijin</Text>
             <Text style={logoSubtext}>Tool Management</Text>
           </Section>
 
@@ -62,7 +61,7 @@ export function SignInEmail({ code, company }: SignInEmailProps) {
               Pokud jste o tento email nežádali, můžete ho ignorovat.
             </Text>
             <Text style={footerText}>
-              Houfek Tool Management System
+              Teijin Tool Management System
             </Text>
           </Section>
         </Container>

@@ -14,10 +14,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Houfek Tool Management",
-  description: "Houfek Tool Management",
+  title: "Teijin Tool Management",
+  description: "Teijin Tool Management",
   icons: {
-    icon: "/icons/houfek.png"
+    icon: "/icons/teijin.png"
   }
 };
 

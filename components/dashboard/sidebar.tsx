@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   Menu,
   MonitorCog,
+  Box,
 } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -19,18 +20,14 @@ const navigation = [
   { name: "Přehled", href: "/", icon: LayoutDashboard },
   { name: "Nástroje", href: "/tools", icon: Wrench },
   { name: "Stroje", href: "/machines", icon:  MonitorCog},
+  { name: "Obrobky", href: "/obrobky", icon: Box },
   { name: "Uživatel", href: "/user", icon: User },
 ]
 
-interface SidebarProps {
-  name: string;
-  icon: string;
-}
+const COMPANY_NAME = "Teijin"
+const COMPANY_ICON = "/icons/teijin.png"
 
-export function DashboardSidebar({
-   name,
-  icon,
-}: SidebarProps) {
+export function DashboardSidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
 
@@ -47,9 +44,9 @@ export function DashboardSidebar({
           <Menu className="h-5 w-5" />
         </Button>
         <div className="ml-4 flex items-center gap-2">
-           <Image width={32} height={32} src={"/icons/"+icon}  alt="Ikona" className="rounded-lg h-9 w-9 text-primary-foreground" />
+           <Image width={32} height={32} src={COMPANY_ICON}  alt="Ikona" className="rounded-lg h-9 w-9 text-primary-foreground" />
 
-          <span className="font-semibold text-sidebar-foreground">{name}</span>
+          <span className="font-semibold text-sidebar-foreground">{COMPANY_NAME}</span>
         </div>
       </div>
 
@@ -72,10 +69,10 @@ export function DashboardSidebar({
           <div className="h-16 flex items-center justify-between px-4 border-b border-sidebar-border">
             <Link href="/" className="flex items-center gap-3">
               
-                 <Image width={32} height={32} src={"/icons/"+icon}  alt="Ikona" className="rounded-lg h-9 w-9 text-primary-foreground" />
+                 <Image width={32} height={32} src={COMPANY_ICON}  alt="Ikona" className="rounded-lg h-9 w-9 text-primary-foreground" />
 
               <div className="flex flex-col">
-                <span className="font-semibold text-sidebar-foreground text-sm">{name}</span>
+                <span className="font-semibold text-sidebar-foreground text-sm">{COMPANY_NAME}</span>
                 <span className="text-xs text-muted-foreground">Tool Management</span>
               </div>
             </Link>

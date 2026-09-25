@@ -6,7 +6,6 @@ export interface Machine {
   id: number
   name: string
   is_running: number
-  organization: number
 }
 
 export function MachinesGrid({ machines , isAdmin}: { machines: Machine[] , isAdmin: boolean}) {
@@ -39,7 +38,7 @@ export function MachinesGrid({ machines , isAdmin}: { machines: Machine[] , isAd
 
       {/* Machine cards */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {machines.map((machine) => (
+        {machines.length > 0 && machines.map((machine) => (
           <MachineCard key={machine.id} machine={machine} isAdmin={isAdmin}/>
         ))}
       </div>

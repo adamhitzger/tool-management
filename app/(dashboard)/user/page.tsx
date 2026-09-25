@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Mail, Shield, AlertTriangle, Building2 } from "lucide-react";
+import { User, Mail, Shield, AlertTriangle } from "lucide-react";
 import { getUser } from "@/database/session";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -12,7 +12,6 @@ import SignOutBtn from "@/components/forms/sign-out";
 import DeleteBtn from "@/components/forms/delete";
 import AcceptRequest from "@/components/forms/accept";
 import RejectRequest from "@/components/forms/reject";
-import NewOrg from "@/components/forms/new-org";
 
 export const dynamic = "force-dynamic";
 
@@ -26,11 +25,10 @@ export default async function UserPage() {
   let requests = null;
   if (user.role === "SUPER_ADMIN" || user.role === "ADMIN") {
     
-    requests = await pool.query("SELECT r.email, r.organization_id, o.name AS organization_name FROM requests r JOIN organizations o ON r.organization_id = o.id;");
+    requests = await pool.query("SELECT email FROM requests ORDER BY id;");
   }
 
   const isAdmin = user.role === "SUPER_ADMIN" || user.role === "ADMIN";
-  const isSuperAdmin = user.role === "SUPER_ADMIN"
   return (
       
 <>
@@ -114,15 +112,6 @@ export default async function UserPage() {
           </div>
         </Card>
       </div>
-      {isSuperAdmin && 
-        <Card className="p-6 space-y-6 bg-card border-border mt-6 md:max-w-1/2">
-          <h3 className="font-semibold text-card-foreground mb-6 flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-muted-foreground" />
-            Založte organizaci
-          </h3>
-          <NewOrg/>
-        </Card>
-      }
 
       {/* Admin Panel - Only visible for admins */}
       {isAdmin && requests && requests.rows.length > 0 && (
@@ -146,16 +135,10 @@ export default async function UserPage() {
                     <p className="font-medium text-card-foreground">
                       {String(r.email)}
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                      {String(r.organization_name)}
-                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <AcceptRequest
-                    email={String(r.email)}
-                    org_id={Number(r.organization_id)}
-                  />
+                  <AcceptRequest email={String(r.email)} />
                   <RejectRequest email={String(r.email)} />
                 </div>
               </div>

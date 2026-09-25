@@ -1,17 +1,13 @@
 "use server";
 
-import { addMachineSchema, AddMachineType, deleteSchema, DeleteType, neworgSchema, NewOrgType, signIn, SignInType, signOutSchema, SignOutType, signUpSchema, SignUpType, update, UpdateUserType, verify, VerifyOTP } from "@/lib/schema";
+import { addMachineSchema, AddMachineType, deleteSchema, DeleteType, signIn, SignInType, signOutSchema, SignOutType, signUpSchema, SignUpType, update, UpdateUserType, verify, VerifyOTP } from "@/lib/schema";
 import { ActionResponse } from "@/types";
-import { promises as fs } from 'fs';
 import nodemailer from "nodemailer"
 import { pool } from "./client";
 import { render } from "@react-email/components";
 import { SignInEmail } from "@/components/emails/sign-in-mail";
 import { createUserSession, getUserFromSession, removeUserFromSession } from "./session";
 import { cookies } from "next/headers";
-import { MAX_ICON_SIZE } from "@/lib/utils";
-import path from "path";
-import slugify from "slugify"
 
 
 function smtp(){
@@ -72,8 +68,7 @@ export async function createMachine(prevState: ActionResponse<AddMachineType>, f
         }
 
         const nondata: AddMachineType = {
-            name: formData.get("name") as string,
-            orgId: Number(formData.get("orgId"))
+            name: formData.get("name") as string
         }
 
         const validation = addMachineSchema.safeParse(nondata);
@@ -89,9 +84,9 @@ export async function createMachine(prevState: ActionResponse<AddMachineType>, f
         const data = validation.data
         
         const insertMachineQ = await pool.query(`
-            INSERT INTO machines (name, is_running, organization) VALUES ($1,$2,$3) RETURNING *;
+            INSERT INTO machines (name, is_running) VALUES ($1,$2) RETURNING *;
             `,
-            [data.name, 0, data.orgId]
+            [data.name, 0]
         )
 
         if(insertMachineQ.rowCount === 0){
@@ -114,77 +109,6 @@ export async function createMachine(prevState: ActionResponse<AddMachineType>, f
             submitted: true,
             success: false,
             message: "Nepovedlo se vytvořit stroj v systému"
-        }
-    }
-}
-
-export async function createOrg(prevState: ActionResponse<NewOrgType>, formData: FormData): Promise<ActionResponse<NewOrgType>>{
-    try{
-        
-        const nondata: NewOrgType = {
-            name: formData.get("name") as string,
-            file: formData.get("logo") as File,
-        }
-        console.log(nondata.file)
-        const validation = neworgSchema.safeParse(nondata);
-
-        if(!validation.success){
-            console.log(validation.error)
-            return{
-                success: false,
-                submitted: true,
-                message: "Nevyplnili jste všechna pole",                
-            }
-        }
-
-        const data = validation.data;        
-
-        if(data.file.size > MAX_ICON_SIZE){
-            return{
-                success: false,
-                submitted: true,
-                message: "Obrázek je větší než 50 bajtů",                
-            }
-        }
-
-        const bytes = await data.file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        const uploadDir = path.join(process.cwd(), "public/icons");
-
-        const filePath = path.join(uploadDir, data.file.name);
-        await fs.writeFile(filePath, buffer)
-        const slug = slugify(data.name,{
-            lower: true,
-            strict: true,
-            locale: "cs",
-        })
-        const timestamp = Date.now()
-        
-        const insertRequest = await pool.query("INSERT INTO organizations (name, slug, created_at, icon_name) VALUES ($1, $2, $3,$4) RETURNING *",
-         [data.name, slug , timestamp ,data.file.name]
-        );
-
-        if(insertRequest.rowCount === 0){
-            return {
-            submitted: true,
-            success: false,
-            message: "Nepodařilo se uložit data, kontaktujte superadministrátora."
-            }
-        }
-
-
-        return{
-            success: true,
-            submitted: true,
-            message: "Organizace byla vytvořena",                
-        }
-    }catch(error){
-        console.log(error)
-        return{
-            success: false,
-            submitted: true,
-            message: "Nepovedlo se vytvořit organizace",                
         }
     }
 }
@@ -412,7 +336,7 @@ export async function signInVerify(
         const data = validation.data;
         ;
         const user = await pool.query(
-            "SELECT u.id, o.name AS organization_name FROM users u JOIN organizations o ON u.organization_id = o.id WHERE u.email = $1;",
+            "SELECT id FROM users WHERE email = $1;",
             [data.email]
         );
 
@@ -434,7 +358,7 @@ export async function signInVerify(
             }
         }
 
-        const html = await render(<SignInEmail code={String(code.code)} company={String(user.rows[0].organization_name)}/>);
+        const html = await render(<SignInEmail code={String(code.code)}/>);
     
         const sendCode = await mail.sendMail({
             subject: "Autorizační kód pro přihlášení",
@@ -472,8 +396,7 @@ export async function signUp(
 
     try{
         const nondata: SignUpType = {
-            email: formData.get("email") as string,
-            org: Number(formData.get("org"))
+            email: formData.get("email") as string
         };
 
         const validation = signUpSchema.safeParse(nondata);
@@ -504,8 +427,8 @@ export async function signUp(
             }
         }
         const insertRequest = await pool.query(
-            "INSERT INTO requests (email, organization_id) VALUES ($1, $2) RETURNING*;",
-            [data.email, data.org]
+            "INSERT INTO requests (email) VALUES ($1) RETURNING*;",
+            [data.email]
         );
 
         if(insertRequest.rowCount === 0){
@@ -584,16 +507,15 @@ export async function deleteAccount(
 
 //User Requests
 export async function acceptRequest(
-    prevState: ActionResponse<DeleteType>,
+    prevState: ActionResponse<SignInType>,
     formData: FormData
-): Promise<ActionResponse<DeleteType>>{
+): Promise<ActionResponse<SignInType>>{
     try{
-        const nondata: DeleteType = {
-            email: formData.get("email") as string,
-            id: Number(formData.get("id"))
+        const nondata: SignInType = {
+            email: formData.get("email") as string
         };
 
-        const validation = deleteSchema.safeParse(nondata);
+        const validation = signIn.safeParse(nondata);
 
         if(!validation.success) {
             return{
@@ -634,8 +556,8 @@ export async function acceptRequest(
         }
 
         const accept = await pool.query(
-            "INSERT INTO users (name, surname, email, role, organization_id) VALUES ($1,$2,$3,$4,$5) RETURNING*",
-            ["Změnte si jméno","Změnte si přijmení",data.email, "PLEBS", data.id]
+            "INSERT INTO users (name, surname, email, role) VALUES ($1,$2,$3,$4) RETURNING*",
+            ["Změnte si jméno","Změnte si přijmení",data.email, "PLEBS"]
         ) 
 
         if(accept.rowCount === 0){

@@ -1,14 +1,7 @@
 import SignUpForm from "@/components/forms/sign-up";
-import { pool } from "@/database/client";
-import { Organization } from "@/types";
 import { Wrench } from "lucide-react";
 
-export const dynamic = "force-dynamic";
-
-export default async function SignUp() {
-
-  const { rows } = await pool.query<Organization>("SELECT id,name FROM organizations");
-
+export default function SignUp() {
   return (
     <div className="min-h-screen w-full flex">
       {/* Left side - Branding */}
@@ -17,21 +10,20 @@ export default async function SignUp() {
           <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
             <Wrench className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-semibold text-foreground">Houfek</span>
+          <span className="text-xl font-semibold text-foreground">Teijin</span>
         </div>
 
         <div className="space-y-6">
           <h1 className="text-4xl font-bold text-foreground text-balance">
-            Připojte se k Houfek Tool Management
+            Připojte se k Teijin Tool Management
           </h1>
           <p className="text-lg text-muted-foreground text-pretty">
-            Vytvořte si účet a získejte přístup ke správě nástrojů vaší
-            organizace.
+            Vytvořte si účet a získejte přístup ke správě nástrojů.
           </p>
         </div>
 
         <p className="text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} Houfek Tool Management
+          &copy; {new Date().getFullYear()} Teijin Tool Management
         </p>
       </div>
 
@@ -44,7 +36,7 @@ export default async function SignUp() {
               <Wrench className="h-5 w-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-semibold text-foreground">
-              Houfek
+              Teijin
             </span>
           </div>
 
@@ -57,7 +49,7 @@ export default async function SignUp() {
             </p>
           </div>
 
-          <SignUpForm rows={rows} />
+          <SignUpForm />
         </div>
       </div>
     </div>

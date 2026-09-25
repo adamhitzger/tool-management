@@ -3,20 +3,13 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useActionState, useEffect } from "react";
-import { ActionResponse, Organization } from "@/types";
-import { SignInType, SignUpType } from "@/lib/schema";
+import { ActionResponse } from "@/types";
+import { SignUpType } from "@/lib/schema";
 import { signUp } from "@/database/actions";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
 export const actionState: ActionResponse<SignUpType> = {
     success: false,
@@ -24,7 +17,7 @@ export const actionState: ActionResponse<SignUpType> = {
     message: "",
 }
 
-export default function SignUpForm({rows}: {rows: Array<Organization>}){
+export default function SignUpForm(){
     const [state, action, isPending]= useActionState(signUp, actionState);
     const router = useRouter()
     useEffect(() => {
@@ -51,16 +44,6 @@ export default function SignUpForm({rows}: {rows: Array<Organization>}){
                 placeholder='Zadejte e-mailovou adresu'
                 className='min-w-60'
               />
-              <Select name="org">
-                <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Vyberte organizaci" />
-                </SelectTrigger>
-                <SelectContent>
-                    {rows.map((v: Organization) => (
-                        <SelectItem key={v.id} value={String(v.id)}>{v.name}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
               <Button
                 type='submit'
               >

@@ -28,7 +28,7 @@ export type Cookies = {
 
   function setCookie(sessionId: string, cookies: Pick<Cookies, "set">) {
     cookies.set(COOKIE_SESSION_KEY, sessionId, {
-      secure: true,
+      secure: false,
       httpOnly: true,
       sameSite: "lax",
       expires: Date.now() + SESSION_EXPIRATION_SECONDS * 1000,
@@ -109,7 +109,7 @@ export type Cookies = {
 
   export async function getUser(cookies: Pick<Cookies, "get">): Promise<User | null>{
     const userFromSession = await getUserFromSession(cookies);
-    await pool.connect();
+    if (userFromSession == null) return null
     const fetchUser = await pool.query<User>(
             "SELECT * FROM users WHERE id = $1",
             [userFromSession]
@@ -122,8 +122,7 @@ export type Cookies = {
         name: fetchUser.rows[0].name || null,   
         surname: fetchUser.rows[0].surname || null,
         email: fetchUser.rows[0].email,
-        role: fetchUser.rows[0].role,
-        organization_id: fetchUser.rows[0].organization_id
+        role: fetchUser.rows[0].role
       }
       return user
     };

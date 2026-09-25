@@ -89,7 +89,7 @@ export function UpdateMachineDialog({
                   ))}
                 </SelectContent>
               </Select>
-              <Input type="hidden" value={id} name="orgId"/>
+              <Input type="hidden" value={id} name="id"/>
             </div>
           </div>
           <DialogFooter>

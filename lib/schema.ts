@@ -5,8 +5,7 @@ export const signIn = z.object({
 });
 
 export const signUpSchema = z.object({
-    email: z.email().min(1, {message: "Email je povinný"}),
-    org: z.number()
+    email: z.email().min(1, {message: "Email je povinný"})
 });
 
 export const verify = z.object({
@@ -28,14 +27,8 @@ export const deleteSchema = z.object({
     id: z.number()
 })
 
-export const neworgSchema = z.object({
-    name: z.string().min(1, {message: "Název je povinný"}),
-    file: z.file()
-})
-
 export const addMachineSchema = z.object({
-    name: z.string().min(1),
-    orgId: z.number().min(1)
+    name: z.string().min(1)
 });
 
 export type SignInType = z.infer<typeof signIn>;
@@ -44,5 +37,4 @@ export type UpdateUserType = z.infer<typeof update>;
 export type SignOutType = z.infer<typeof signOutSchema>;
 export type SignUpType = z.infer<typeof signUpSchema>;
 export type DeleteType = z.infer<typeof deleteSchema>;
-export type NewOrgType = z.infer<typeof neworgSchema>;
 export type AddMachineType = z.infer<typeof addMachineSchema>

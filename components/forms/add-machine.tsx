@@ -20,7 +20,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
-import { Input } from "../ui/input"
 import { ActionResponse } from "@/types"
 import { AddMachineType } from "@/lib/schema"
 import { createMachine } from "@/database/actions"
@@ -41,9 +40,7 @@ export const actionState: ActionResponse<AddMachineType> = {
     message: "",
 }
 
-export function AddMachineDialog({
-    orgId
-}: { orgId: number}) {
+export function AddMachineDialog() {
   const [open, setOpen] = useState(false)
   const [state, action, isPending] = useActionState(createMachine, actionState)
   
@@ -91,7 +88,6 @@ export function AddMachineDialog({
                   ))}
                 </SelectContent>
               </Select>
-              <Input type="hidden" value={orgId} name="orgId"/>
             </div>
           </div>
           <DialogFooter>

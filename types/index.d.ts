@@ -1,5 +1,3 @@
-import { string } from "zod";
-
 export interface ActionResponse<T> {
     success: boolean;
     message: string;
@@ -16,22 +14,19 @@ export type User = {
     surname: string | null;
     email: string;
     role: string;
-    organization_id: number;
 }
 
-export type Organization = {
+export type Obrobek = {
     id: number;
-    name: string;
-    created_at?: number;
-};
+    obrobek_id: string;
+}
 
 export interface ToolHistoryPayload {
-  tool_id: number
+  tool_id: string
   start: number
   end: number;
   obrobek_id: string
   korekce: string
-  organization_id: number,
   type: string,
   machine_id: number
 }

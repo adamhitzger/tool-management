@@ -14,11 +14,8 @@ export default async function Machines(){
         redirect("/auth/sign-in")
       }
       const {rows} = await pool.query<Machine>(`
-        SELECT * FROM machines WHERE organization_id = $1  
-      `
-      ,[user.organization_id]
-      )
-      console.log(rows)
+        SELECT * FROM machines ORDER BY id
+      `)
       
       const isAdmin = user.role === "SUPER_ADMIN" || user.role === "ADMIN";
   
@@ -29,7 +26,7 @@ export default async function Machines(){
             description="Přehled CNC strojů"
             actions={
          isAdmin &&<>
-            <AddMachineDialog orgId={user.organization_id}/>   
+            <AddMachineDialog/>   
           </>
         }
           />

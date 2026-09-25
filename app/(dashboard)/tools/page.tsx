@@ -78,7 +78,6 @@ export default async function ToolsPage() {
   if (user == null) {
     redirect("/auth/sign-in")
   }
-  await pool.connect()
   const { rows } = await pool.query<Tool>(
      `
     SELECT 
@@ -86,7 +85,6 @@ export default async function ToolsPage() {
     t.type,
     t.is_ok,
     t.first_usage,
-    t.organization_id,
     t.machine_id,
     m.name AS name,
     COALESCE(th_counts.history_count, 0) AS history_count
@@ -99,14 +97,11 @@ LEFT JOIN (
     ON th_counts.tool_id = t.id
 LEFT JOIN machines m
     ON m.id = t.machine_id
-WHERE t.organization_id = $1
 ORDER BY t.id DESC;
-    `,
-     [user.organization_id]
+    `
   )
 
   const tools = rows as unknown as Tool[]
-console.log(tools)
   return (
     <>
       <PageHeader

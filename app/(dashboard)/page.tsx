@@ -7,6 +7,7 @@ import { StatCard } from "@/components/dashboard/stat-card"
 import { DataTable } from "@/components/dashboard/data-table"
 
 import { Badge } from "@/components/ui/badge"
+import Link from "next/link"
 import { Wrench, Clock, Activity, AlertTriangle } from "lucide-react"
 
 export const dynamic = "force-dynamic";
@@ -38,9 +39,8 @@ export default async function Home() {
       COUNT(th.tool_id) OVER (PARTITION BY th.tool_id) AS usage_count
     FROM tools_history th
     JOIN tools t ON t.id = th.tool_id
-    WHERE th.organization_id = $1;
-  `,
-[user.organization_id]
+    ORDER BY th.start DESC;
+  `
 )
   const history = rows
 
@@ -137,7 +137,12 @@ export default async function Home() {
       key: "obrobek_id",
       header: "Obrobek",
       render: (row: ToolHistoryRow) => (
-        <span className="text-center font-mono text-sm">{String(row.obrobek_id)}</span>
+        <Link
+          href={`/obrobky/${encodeURIComponent(String(row.obrobek_id))}`}
+          className="relative z-20 font-mono text-sm text-primary hover:underline"
+        >
+          {String(row.obrobek_id)}
+        </Link>
       ),
     },
     {
